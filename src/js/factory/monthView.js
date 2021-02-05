@@ -89,12 +89,29 @@ function createMonthView(baseController, layoutContainer, dragHandler, options) 
                 datetime.start(date),
                 datetime.end(date)
             ), clickMoreSchedule.ymd);
+        
+        if (!schedules) {
+            return;        
+        }  
 
         schedules.items = util.filter(schedules.items, function(item) {
             return options.month.scheduleFilter(item.model);
-        });
+        });     
 
-        if (schedules && schedules.length) {
+        if (schedules.length) {  
+            monthView.fire('clickMore', {
+                date: clickMoreSchedule.date,
+                target: moreView.getMoreViewElement()
+            });
+            schedules = util.pick(baseController.findByDateRange(
+                datetime.start(date),
+                datetime.end(date)
+            ), clickMoreSchedule.ymd);
+            
+            schedules.items = util.filter(schedules.items, function(item) {
+                return options.month.scheduleFilter(item.model);
+            });               
+
             moreView.render(getViewModelForMoreLayer(date, target, schedules, monthView.options.daynames));
 
             schedules.each(function(scheduleViewModel) {
@@ -104,11 +121,6 @@ function createMonthView(baseController, layoutContainer, dragHandler, options) 
                      */
                     monthView.fire('afterRenderSchedule', {schedule: scheduleViewModel.model});
                 }
-            });
-
-            monthView.fire('clickMore', {
-                date: clickMoreSchedule.date,
-                target: moreView.getMoreViewElement()
             });
         }
     });
